@@ -3,3 +3,4 @@ langgraph
 dotenv
 langchain_openai
 ikernal
+streamlit
