@@ -3,3 +3,7 @@ venv*
 /venv/*
 .env
 *.bin
+*.db*
+__pycache__
+*.sqlite
+*.pyc*

@@ -1,5 +1,5 @@
 import streamlit as st
-from backend import chatbot
+from backend import chatbot, retrieve_all_threads, delete_thread_from_db
 from langchain_core.messages import HumanMessage, AIMessage
 import uuid
 
@@ -18,13 +18,22 @@ def add_thread(thread_id):
         st.session_state['chat_threads'].append(thread_id)
 
 def delete_thread(thread_id):
-    """Delete a conversation thread"""
-    if thread_id in st.session_state['chat_threads']:
-        st.session_state['chat_threads'].remove(thread_id)
+    """Delete a conversation thread from both session state and database"""
+    # Delete from database first
+    db_deleted = delete_thread_from_db(thread_id)
     
-    # If we're deleting the current thread, create a new one
-    if st.session_state['thread_id'] == thread_id:
-        reset_chat()
+    if db_deleted:
+        # Remove from session state
+        if thread_id in st.session_state['chat_threads']:
+            st.session_state['chat_threads'].remove(thread_id)
+        
+        # If we're deleting the current thread, create a new one
+        if st.session_state['thread_id'] == thread_id:
+            reset_chat()
+        
+        st.success(f"Thread {thread_id[:8]} deleted successfully!")
+    else:
+        st.error(f"Failed to delete thread {thread_id[:8]} from database!")
     
     # Clear confirmation state
     st.session_state['confirm_delete'] = None
@@ -44,7 +53,7 @@ if 'thread_id' not in st.session_state:
     st.session_state['thread_id'] = generate_thread_id()
     
 if 'chat_threads' not in st.session_state:
-    st.session_state['chat_threads'] = []
+    st.session_state['chat_threads'] = retrieve_all_threads()
 
 if 'confirm_delete' not in st.session_state:
     st.session_state['confirm_delete'] = None
