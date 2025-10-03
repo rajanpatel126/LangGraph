@@ -4,3 +4,4 @@ dotenv
 langchain_openai
 ikernal
 streamlit
+langgraph-checkpoint-sqlite
